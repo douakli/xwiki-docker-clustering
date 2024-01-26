@@ -1,0 +1,13 @@
+DBs:
+PostgreSQL
+MySQL
+MariaDB
+Oracle
+
+Servlet engine:
+Tomcat
+Jetty
+
+Reverse proxy:
+Apache
+Nginx
