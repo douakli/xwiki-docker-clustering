@@ -1,0 +1,26 @@
+diff --git a/WEB-INF/xwiki.properties b/WEB-INF/xwiki.properties
+index 96ddf5d..e059343 100644
+--- a/WEB-INF/xwiki.properties
++++ b/WEB-INF/xwiki.properties
+@@ -676,10 +676,10 @@ extension.oldflavors=com.xpn.xwiki.products:xwiki-enterprise-wiki
+ # distribution.automaticStartOnMainWiki=true
+ # distribution.automaticStartOnWiki=true
+ 
+-#-# [Since 10.2RC1] Control if the Distribution Wizard should be automatic or interactive (the default)
++#-# [Since 10.2RC1] Control if the Distribution Wizard should be automatic or interactive (the default, overridden by this Docker Image).
+ #-# 
+ #-# On the main wiki
+-# distribution.job.interactive=true
++distribution.job.interactive=false
+ #-# On the subwikis
+ # distribution.job.interactive.wiki=true
+ 
+@@ -690,7 +690,7 @@ extension.oldflavors=com.xpn.xwiki.products:xwiki-enterprise-wiki
+ #-#
+ #-# The id[/version] of the default UI for the main wiki. If the version is not indicated it will be the version of the
+ #-# environment extension.
+-# distribution.defaultUI=org.my.groupid:artifactid-mainwiki/1.5
++distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mainwiki
+ #-# The id[/version] default UI for the subwikis.  If the version is not indicated it will be the version of the
+ #-# environment extension.
+ # distribution.defaultWikiUI=org.my.groupid:artifactid-wiki/1.5

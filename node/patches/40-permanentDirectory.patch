@@ -1,0 +1,13 @@
+diff --git a/WEB-INF/xwiki.properties b/WEB-INF/xwiki.properties
+index e059343..04a35eb 100644
+--- a/WEB-INF/xwiki.properties
++++ b/WEB-INF/xwiki.properties
+@@ -88,7 +88,7 @@
+ #-# If neither the system property nor this configuration value here are set then the Servlet container's temporary
+ #-# directory is used; This is absolutely not recommended since that directory could be wiped out at any time and you
+ #-# should specify a value.
+-# environment.permanentDirectory = /var/lib/xwiki/data/
++environment.permanentDirectory = /usr/local/tomcat/webapps/xwiki/data
+ 
+ #-------------------------------------------------------------------------------------
+ # Rendering

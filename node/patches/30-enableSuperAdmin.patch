@@ -1,0 +1,13 @@
+diff --git a/WEB-INF/xwiki.cfg b/WEB-INF/xwiki.cfg
+index 70d5445..2dfb462 100644
+--- a/WEB-INF/xwiki.cfg
++++ b/WEB-INF/xwiki.cfg
+@@ -299,6 +299,8 @@ xwiki.inactiveuser.allowedpages=
+ #-# security breach if it were set and you forgot about it. Should only be enabled
+ #-# for recovering the Wiki when the rights are completely messed.
+ # xwiki.superadminpassword=system
++# DOCKER: SUPERADMIN_PASSWORD_INSERTION_LOCATION
++# DOCKER: SUPERADMIN_PASSWORD_INSERTION_END_LOCATION
+ 
+ #-# Authentication type. You can use 'basic' to always use basic authentication.
+ # xwiki.authentication=form

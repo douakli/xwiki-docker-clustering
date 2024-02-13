@@ -1,0 +1,42 @@
+services:
+    tomcat:
+        build: node/
+        ports:
+            - 8002:8080
+        deploy:
+            resources:
+                limits:
+                    memory: 16G
+        volumes:
+            # Note: This volume also contains the hsqldb(default) database.
+            - ./data/tomcat:/usr/local/tomcat/webapps/xwiki
+
+        env_file: env/connector/${COMPOSE_PROFILES}.env
+
+    mariadb:
+        image: mariadb
+        env_file:
+            - env/db/mariadb.env
+            - .env
+        volumes:
+            - ./data/mariadb:/var/lib/mysql
+        profiles:
+            - mariadb
+
+    postgresql:
+        image: postgres
+        env_file:
+            - env/db/postgresql.env
+            - .env
+        volumes:
+            - ./data/postgresql:/var/lib/postgresql/data
+        profiles:
+            - postgresql
+
+    mysql:
+        image: mysql
+        env_file: env/db/mysql.env
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+        profiles:
+            - mysql

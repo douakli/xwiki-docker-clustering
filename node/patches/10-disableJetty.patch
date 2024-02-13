@@ -1,0 +1,24 @@
+diff --git a/WEB-INF/hibernate.cfg.xml b/WEB-INF/hibernate.cfg.xml
+index 72ae616..fa2660c 100644
+--- a/WEB-INF/hibernate.cfg.xml
++++ b/WEB-INF/hibernate.cfg.xml
+@@ -98,7 +98,7 @@
+ 
+          If you want the main wiki database to be different than "xwiki" (or the default schema for schema based
+          engines) you will also have to set the property xwiki.db in xwiki.cfg file
+-    -->
++
+     <property name="hibernate.connection.url">jdbc:hsqldb:file:${environment.permanentDirectory}/database/xwiki_db;shutdown=true</property>
+     <property name="hibernate.connection.username">sa</property>
+     <property name="hibernate.connection.password"></property>
+@@ -113,6 +113,10 @@
+     <mapping resource="instance.hbm.xml"/>
+     <mapping resource="notification-filter-preferences.hbm.xml"/>
+     <mapping resource="mailsender.hbm.xml"/>
++    -->
++
++    <!-- DOCKER: HIBERNATE_INSERTION_LOCATION -->
++    <!-- DOCKER: HIBERNATE_INSERTION_END_LOCATION -->
+ 
+     <!-- MySQL configuration.
+          Uncomment if you want to use MySQL and comment out other database configurations.

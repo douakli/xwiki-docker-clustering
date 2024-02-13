@@ -11,3 +11,23 @@ Jetty
 Reverse proxy:
 Apache
 Nginx
+
+
+First try: Downlaod the war in $CATALINA_HOME/webapps. Letting tomcat unpack it.
+Had to look at the log files in the container and see that we had a `java.lang.NoClassDefFoundError: javax/servlet/ServletContextListener` error.
+By googling the issue, we determined that the tomcat version we used was not compatible with XWiki.
+We will now follow XWiki's Tomcat documentation: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Installation/InstallationWAR/InstallationTomcat/
+
+For XWiki to run, it needs to be configured.
+Two notable things: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Configuration/#HConfiguringDirectories => Need to set a permanent storage (docker volume)
+And configuring the database: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Installation/InstallationWAR/InstallationMariaDB/ is done through a file.
+This is usually done through environment variables in docker images though.
+
+One thing, the xwiki.properties configuration file is an important configuration file. We need to provide some defaults, but ultimately, the administrator might
+want to change things in there. The correct approach would be to provide a default here and feed it into the container at runtime. That way, the user can make changes
+to it.
+
+Because we need the project to work out of the box, and there are many configuration files, we will initaliaze the project with good default, and move it into a use controlled
+volume, where they can adjust details of their own.
+
+We also need to inject the jdbc connector. Let's try to see if we can do this through a symlink.
