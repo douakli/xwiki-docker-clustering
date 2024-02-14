@@ -31,3 +31,12 @@ Because we need the project to work out of the box, and there are many configura
 volume, where they can adjust details of their own.
 
 We also need to inject the jdbc connector. Let's try to see if we can do this through a symlink.
+
+
+It seems like the official solr docker image is broken with volumes by default.
+we get the following error `Cannot write to /var/solr as 8983:8983` when /var/solr is mounted as a docker volume.
+This is because the Docker engine creates the volume with root ownership by default. However, the solr docker image runs with a specific user.
+We need to wrap the entrypoint and change the permissions of the /var/solr directory before doing anything.
+
+The entrypoint runs as "solr" user of course. We decided to write a script to change the permissions of the directory, and run it with a setuid.
+However, a script's setuid isn't effective. (see http://www.faqs.org/faqs/unix-faq/faq/part4/section-7.html)

@@ -1,4 +1,5 @@
 services:
+    # ---XWiki Nodes---
     tomcat:
         build: node/
         ports:
@@ -11,8 +12,24 @@ services:
             # Note: This volume also contains the hsqldb(default) database.
             - ./data/tomcat:/usr/local/tomcat/webapps/xwiki
 
-        env_file: env/connector/${COMPOSE_PROFILES}.env
+        env_file:
+            - env/connector/${DB_TYPE}.env
+            - .env
 
+    # ---Solr---
+    solr:
+        build: solr/
+        volumes:
+            - ./data/solr:/var/solr
+        ports:
+            - 8983:8983
+        profiles:
+            - solr-external
+        # command:
+        #     - solr-precreate
+        #     - gettingstarted
+
+    # ---Databases---
     mariadb:
         image: mariadb
         env_file:
@@ -35,7 +52,9 @@ services:
 
     mysql:
         image: mysql
-        env_file: env/db/mysql.env
+        env_file:
+            - env/db/mysql.env
+            - .env
         volumes:
             - ./data/mysql:/var/lib/mysql
         profiles:
