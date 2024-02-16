@@ -25,6 +25,6 @@ index 1ccfb02..a8707f1 100644
 +    Allow from all
 +  </Proxy>
 +  ProxyPreserveHost On
-+  ProxyPass /xwiki http://xwiki-tomcat-1:8080/xwiki nocanon
-+  ProxyPassReverse /xwiki http://xwiki-tomcat-1:8080/xwiki
++  ProxyPass /xwiki http://tomcat:8080/xwiki nocanon
++  ProxyPassReverse /xwiki http://tomcat:8080/xwiki
 +</VirtualHost>

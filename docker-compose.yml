@@ -5,39 +5,42 @@ services:
         build: apache/
         ports:
             - 8002:80
+        networks:
+            - cluster
 
 
     # ---XWiki Nodes---
     tomcat:
         build: tomcat/
-        # ports:
-        #     - 8002:8080
+        volumes:
+            # Note: This volume also contains the hsqldb(default) database.
+            - ./data/tomcat:/usr/local/tomcat/webapps/xwiki
+        networks:
+            - cluster
+            - database
+            - solr
         deploy:
             resources:
                 limits:
                     memory: 16G
             mode: replicated
-            replicas: 2
-        volumes:
-            # Note: This volume also contains the hsqldb(default) database.
-            - ./data/tomcat:/usr/local/tomcat/webapps/xwiki
+            replicas: 1
 
         env_file:
             - env/connector/${DB_TYPE}.env
             - env/tomcat.env
             - .env
+
+
     # ---Solr---
     solr:
         build: solr/
         volumes:
             - ./data/solr:/var/solr
-        ports:
-            - 8983:8983
+        networks:
+            - solr
         profiles:
             - solr-remote
-        # command:
-        #     - solr-precreate
-        #     - gettingstarted
 
     # ---Databases---
     mariadb:
@@ -47,6 +50,8 @@ services:
             - .env
         volumes:
             - ./data/mariadb:/var/lib/mysql
+        networks:
+            - database
         profiles:
             - mariadb
 
@@ -57,6 +62,8 @@ services:
             - .env
         volumes:
             - ./data/postgresql:/var/lib/postgresql/data
+        networks:
+            - database
         profiles:
             - postgresql
 
@@ -67,5 +74,12 @@ services:
             - .env
         volumes:
             - ./data/mysql:/var/lib/mysql
+        networks:
+            - database
         profiles:
             - mysql
+
+networks:
+    cluster:
+    database:
+    solr:

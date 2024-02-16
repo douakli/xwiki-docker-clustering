@@ -11,11 +11,11 @@ index 4cfd2c0..b43c045 100644
 -    Allow from all
 -  </Proxy>
    ProxyPreserveHost On
--  ProxyPass /xwiki http://xwiki-tomcat-1:8080/xwiki nocanon
--  ProxyPassReverse /xwiki http://xwiki-tomcat-1:8080/xwiki
+-  ProxyPass /xwiki http://tomcat:8080/xwiki nocanon
+-  ProxyPassReverse /xwiki http://tomcat:8080/xwiki
 +
 +  <Proxy balancer://mycluster>
-+  BalancerMember ajp://xwiki-tomcat-1:8009 route=jvm1
++  BalancerMember ajp://tomcat:8009 route=jvm1
 +  ProxySet stickysession=JSESSIONID
 +  </Proxy>
 +  ProxyPass /xwiki balancer://mycluster/xwiki
