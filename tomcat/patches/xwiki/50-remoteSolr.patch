@@ -1,0 +1,24 @@
+diff --git a/WEB-INF/xwiki.properties b/WEB-INF/xwiki.properties
+index 04a35eb..73b86b5 100644
+--- a/WEB-INF/xwiki.properties
++++ b/WEB-INF/xwiki.properties
+@@ -703,6 +703,9 @@ distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mai
+ #-# The Solr server type. Currently accepted values are "embedded" (default) and "remote".
+ # solr.type=embedded
+ 
++# DOCKER: SOLR_TYPE_INSERTION_LOCATION
++# DOCKER: SOLR_TYPE_INSERTION_END_LOCATION
++
+ #-# [Since 4.5M1]
+ #-# The location where the embedded Solr instance home folder is located.
+ #-# The default is the subfolder "store/solr" inside folder defined by the property "environment.permanentDirectory".
+@@ -714,6 +717,9 @@ distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mai
+ #-# using the default port.
+ # solr.remote.baseURL=http://localhost:8983/solr
+ 
++# DOCKER: SOLR_URL_INSERTION_LOCATION
++# DOCKER: SOLR_URL_INSERTION_END_LOCATION
++
+ #-# [Since 12.6]
+ #-# The prefix to add in front on each remote core name to avoid collisions with non-XWiki cores.
+ #-# The default is "xwiki" which will produce names likes "xwiki_events" for example.

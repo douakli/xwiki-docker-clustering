@@ -9,6 +9,7 @@
 
 int main(int argc, char** argv) {
 
+    // Store the current uid to be able to switch back once we're done.
     __uid_t old_uid = getuid();
 
     // Switch to root.

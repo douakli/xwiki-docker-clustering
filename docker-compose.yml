@@ -1,21 +1,31 @@
 services:
+
+    # ---Load balancer---
+    apache:
+        build: apache/
+        ports:
+            - 8002:80
+
+
     # ---XWiki Nodes---
     tomcat:
-        build: node/
-        ports:
-            - 8002:8080
+        build: tomcat/
+        # ports:
+        #     - 8002:8080
         deploy:
             resources:
                 limits:
                     memory: 16G
+            mode: replicated
+            replicas: 2
         volumes:
             # Note: This volume also contains the hsqldb(default) database.
             - ./data/tomcat:/usr/local/tomcat/webapps/xwiki
 
         env_file:
             - env/connector/${DB_TYPE}.env
+            - env/tomcat.env
             - .env
-
     # ---Solr---
     solr:
         build: solr/
@@ -24,7 +34,7 @@ services:
         ports:
             - 8983:8983
         profiles:
-            - solr-external
+            - solr-remote
         # command:
         #     - solr-precreate
         #     - gettingstarted

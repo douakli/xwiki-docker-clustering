@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# ---XWiki installation---
+
 # Check if XWiki webapp is initialized
 if [ ! -d "$CATALINA_HOME/webapps/xwiki/WEB-INF" ]
     then
@@ -7,6 +9,9 @@ if [ ! -d "$CATALINA_HOME/webapps/xwiki/WEB-INF" ]
     mkdir $CATALINA_HOME/webapps/xwiki
     mv "$CATALINA_HOME/webapps.dist/xwiki/"* "$CATALINA_HOME/webapps/xwiki"
 fi
+
+
+# ---JDBC Connector configuration---
 
 # Add the selected JDBC connector
 # Note: We always use the same jar file to make it possible to replace the connector.
@@ -24,6 +29,9 @@ done
 # Apply the selected hibernate configuration. (Insert *after* the INSERTION_LOCATION marker)
 sed -i '/DOCKER: HIBERNATE_INSERTION_LOCATION'"/r /usr/local/share/xwiki/$DB.conf" $CATALINA_HOME/webapps/xwiki/WEB-INF/hibernate.cfg.xml
 
+
+# ---XWiki Superadmin configuration---
+
 # Clean up previously inserted superadmin password. (Remove everyting *between* the INSERTION_LOCATION and INSERTION_END_LOCATION markers)
 sed -i '/DOCKER: SUPERADMIN_PASSWORD_INSERTION_LOCATION/,/DOCKER: SUPERADMIN_PASSWORD_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/webapps/xwiki/WEB-INF/xwiki.cfg
 
@@ -36,6 +44,31 @@ if [ $XWIKI_SUPERADMIN_PASSWORD ]
 
     # Remember to remove the temp file.
     rm /tmp/superadmin
+fi
+
+
+# ---Solr configuration---
+
+# Clean up previously inserted solr type configuration.
+sed -i '/DOCKER: SOLR_TYPE_INSERTION_LOCATION/,/DOCKER: SOLR_TYPE_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/webapps/xwiki/WEB-INF/xwiki.properties
+
+# Clean up previously inserted solr URL configuration.
+sed -i '/DOCKER: SOLR_URL_INSERTION_LOCATION/,/DOCKER: SOLR_URL_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/webapps/xwiki/WEB-INF/xwiki.properties
+
+# Insert new solr type configuration
+echo "solr.type=$SOLR_TYPE" > /tmp/SolrType
+sed -i '/DOCKER: SOLR_TYPE_INSERTION_LOCATION'"/r /tmp/SolrType" $CATALINA_HOME/webapps/xwiki/WEB-INF/xwiki.properties
+rm /tmp/SolrType
+
+# Insert new solr url configuration.
+if [ $SOLR_URL ]
+    then
+    # Write to a file for easier escaping.
+    echo solr.remote.baseURL="$SOLR_URL" > /tmp/SolrURL
+    sed -i '/DOCKER: SOLR_URL_INSERTION_LOCATION'"/r /tmp/SolrURL" $CATALINA_HOME/webapps/xwiki/WEB-INF/xwiki.properties
+
+    # Remember to remove the temp file.
+    rm /tmp/SolrURL
 fi
 
 # Exec replaces the running process with the given command.

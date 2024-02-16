@@ -1,0 +1,22 @@
+diff --git a/WEB-INF/xwiki.properties b/WEB-INF/xwiki.properties
+index 73b86b5..80b555f 100644
+--- a/WEB-INF/xwiki.properties
++++ b/WEB-INF/xwiki.properties
+@@ -442,7 +442,7 @@ environment.permanentDirectory = /usr/local/tomcat/webapps/xwiki/data
+ #-# [Since 2.0M3]
+ #-# Indicate if the network distribution module is enabled or not.
+ #-# By default remote events are disabled.
+-# observation.remote.enabled = false
++observation.remote.enabled = true
+ 
+ #-# [Since 2.0M3]
+ #-# The list of events communication channels to start when the application starts.
+@@ -451,7 +451,7 @@ environment.permanentDirectory = /usr/local/tomcat/webapps/xwiki/data
+ #-# The default remote event distribution implementation is using JGroups and you'll need to either use embedded
+ #-# JGroups configuration files or drop your custom configuration in the WEB-INF/observation/remote/jgroups/ directory.
+ #-# There's a README file in that directory with more information.
+-#-# Example: observation.remote.channels = public, cluster
++observation.remote.channels = udp
+ 
+ #-# [Since 2.0M4]
+ #-# The implementation of network adapter to use.

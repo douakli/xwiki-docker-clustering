@@ -40,3 +40,8 @@ We need to wrap the entrypoint and change the permissions of the /var/solr direc
 
 The entrypoint runs as "solr" user of course. We decided to write a script to change the permissions of the directory, and run it with a setuid.
 However, a script's setuid isn't effective. (see http://www.faqs.org/faqs/unix-faq/faq/part4/section-7.html)
+
+We managed to get solr to run externally and enabled clustering.
+Now we need to run multiple tomcat instances, with a way to differentiate them.
+Also, part of the permanent storage is expected to be shared. Part of the permanent storage is expected to be local only to avoid conflicts.
+To my understanding, only the data/store directory is to be shared.

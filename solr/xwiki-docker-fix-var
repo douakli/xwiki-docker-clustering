@@ -1,8 +1,0 @@
-#!/bin/bash
-# WARNING: This script requires a setuid. It will run as root while being launched as a standard user.
-
-# Copy the solr directory with the correct ownership.
-cp -a /var/solr /mnt/data/
-
-# Bind mount to redirect accesses to /var/solr.
-mount --bind /mnt/data /var/solr
