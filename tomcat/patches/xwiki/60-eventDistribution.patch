@@ -16,7 +16,7 @@ index 73b86b5..80b555f 100644
  #-# JGroups configuration files or drop your custom configuration in the WEB-INF/observation/remote/jgroups/ directory.
  #-# There's a README file in that directory with more information.
 -#-# Example: observation.remote.channels = public, cluster
-+observation.remote.channels = udp
++observation.remote.channels = gossip
  
  #-# [Since 2.0M4]
  #-# The implementation of network adapter to use.

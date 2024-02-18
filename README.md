@@ -78,7 +78,7 @@ XWiki requires a servlet engine such as Tomcat or Jetty to run.
 We decided to use Tomcat for this dockerization.
 
 This is technically all that is *required* for XWiki to run.
-XWiki uses a database and a Solr indexer, but there are embededd versions
+XWiki uses a database and a Solr indexer, but there are embedded versions
 contained in the webapp's WAR.
 
 These defaults are fine for a test environment, but are not ideal for a production

@@ -1,0 +1,8 @@
+diff --git a/WEB-INF/version.properties b/WEB-INF/version.properties
+index 33424bc..c8a0a74 100644
+--- a/WEB-INF/version.properties
++++ b/WEB-INF/version.properties
+@@ -1 +1,2 @@
+-version=16.0.0
++# DOCKER: VERSION_INSERTION_LOCATION
++# DOCKER: VERSION_INSERTION_END_LOCATION

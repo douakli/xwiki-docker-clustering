@@ -6,7 +6,9 @@
 if [ ! -d "$CATALINA_HOME/webapps/xwiki/WEB-INF" ]
     then
     # Install XWiki.
-    mkdir $CATALINA_HOME/webapps/xwiki
+    mkdir -p $CATALINA_HOME/webapps/xwiki/data
+    mv "$CATALINA_HOME/webapps.dist/xwiki/data/"* "$CATALINA_HOME/webapps/xwiki/data/"
+    rmdir "$CATALINA_HOME/webapps.dist/xwiki/data"
     mv "$CATALINA_HOME/webapps.dist/xwiki/"* "$CATALINA_HOME/webapps/xwiki"
 fi
 
@@ -70,6 +72,31 @@ if [ $SOLR_URL ]
     # Remember to remove the temp file.
     rm /tmp/SolrURL
 fi
+
+# Find the correct interface for the cluster communications.
+export GOSSIP_IF=$(ip -o route get $(getent hosts $GOSSIP_HOST | awk '{ print $1 }') | perl -nle 'if ( /dev\s+(\S+)/ ) {print $1}')
+
+# Insert the interface and gossip host in the gossip configuraiton.
+for var_name in GOSSIP_HOST GOSSIP_IF
+    do
+    sed -i 's/$'"$var_name"'/'"${!var_name}"'/' /usr/local/share/xwiki/gossip.conf
+done
+sed -i '/DOCKER: JGROUP_INSERTION_LOCATION/,/DOCKER: JGROUP_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/webapps/xwiki/WEB-INF/observation/remote/jgroups/gossip.xml
+sed -i '/DOCKER: JGROUP_INSERTION_LOCATION'"/r /usr/local/share/xwiki/gossip.conf" $CATALINA_HOME/webapps/xwiki/WEB-INF/observation/remote/jgroups/gossip.xml
+
+# Clean up previously inserted jvmRoute configuration.
+sed -i '/DOCKER: ENGINE_TAG_INSERTION_LOCATION/,/DOCKER: ENGINE_TAG_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/conf/server.xml
+
+# Add the JvmRoute
+echo '<Engine name="Catalina" defaultHost="localhost" jvmRoute="'"jvm-$NODE_NAME"'">' > /tmp/jvmRoute
+sed -i '/DOCKER: ENGINE_TAG_INSERTION_LOCATION'"/r /tmp/jvmRoute" $CATALINA_HOME/conf/server.xml
+
+# Clean up previously inserted version configuration.
+sed -i '/DOCKER: VERSION_INSERTION_LOCATION/,/DOCKER: VERSION_INSERTION_END_LOCATION/{//!d}' $CATALINA_HOME/webapps/xwiki/WEB-INF/version.properties
+
+# Add the version
+echo "version=16.0.0-$NODE_NAME" > /tmp/version
+sed -i '/DOCKER: VERSION_INSERTION_LOCATION'"/r /tmp/version" $CATALINA_HOME/webapps/xwiki/WEB-INF/version.properties
 
 # Exec replaces the running process with the given command.
 exec catalina.sh run

@@ -1,0 +1,15 @@
+diff --git a/conf/server.xml b/conf/server.xml
+index 54b4eba..0fff41c 100644
+--- a/conf/server.xml
++++ b/conf/server.xml
+@@ -118,7 +118,9 @@
+     <!-- You should set jvmRoute to support load-balancing via AJP ie :
+     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+     -->
+-    <Engine name="Catalina" defaultHost="localhost">
++
++    <!-- DOCKER: ENGINE_TAG_INSERTION_LOCATION -->
++    <!-- DOCKER: ENGINE_TAG_INSERTION_END_LOCATION -->
+ 
+       <!--For clustering, please take a look at documentation at:
+           /docs/cluster-howto.html  (simple how to)

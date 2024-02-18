@@ -1,0 +1,29 @@
+diff --git a/WEB-INF/observation/remote/jgroups/gossip.xml b/WEB-INF/observation/remote/jgroups/gossip.xml
+new file mode 100644
+index 0000000..a2c4d1d
+--- /dev/null
++++ b/WEB-INF/observation/remote/jgroups/gossip.xml
+@@ -0,0 +1,23 @@
++<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++        xmlns="urn:org:jgroups"
++        xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups.xsd"
++        >
++    <!-- DOCKER: JGROUP_INSERTION_LOCATION -->
++    <!-- DOCKER: JGROUP_INSERTION_END_LOCATION -->
++    <MERGE3  min_interval="10000"
++             max_interval="30000"/>
++    <FD_SOCK2/>
++    <FD_ALL3 timeout="40000" interval="5000" />
++    <VERIFY_SUSPECT2 timeout="1500"  />
++    <BARRIER />
++    <pbcast.NAKACK2 use_mcast_xmit="false" />
++    <UNICAST3 />
++    <pbcast.STABLE desired_avg_gossip="50000"
++                   max_bytes="4M"/>
++    <pbcast.GMS print_local_addr="true" join_timeout="2000"/>
++    <UFC max_credits="2M"
++         min_threshold="0.4"/>
++    <MFC max_credits="2M"
++         min_threshold="0.4"/>
++    <FRAG2 frag_size="60K"  />
++</config>

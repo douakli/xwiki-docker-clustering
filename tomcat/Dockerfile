@@ -46,7 +46,7 @@ RUN wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.3.0/mysql-
 # XWiki is not compatible with tomcat 10, this is why we use tomcat 9.
 FROM tomcat:9
 
-RUN apt-get update && apt-get install -y patch
+RUN apt-get update && apt-get install -y patch iproute2
 
 COPY patches/tomcat /tmp/tomcat-patches
 RUN for patchFile in /tmp/tomcat-patches/*; do patch -p1 < $patchFile; done
