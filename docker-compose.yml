@@ -1,3 +1,5 @@
+version: '3'
+
 x-tomcat:
     &tomcat
     build: tomcat/
@@ -13,6 +15,24 @@ x-tomcat:
     depends_on:
         - gossip
 
+# ---Global definitions---
+volumes:
+    tomcat-attachments:
+    node1:
+    node2:
+    solr:
+    mariadb:
+    postgresql:
+    mysql:
+
+networks:
+    web:
+    cluster:
+        internal: true
+    database:
+        internal: true
+    solr:
+        internal: true
 
 services:
 
@@ -20,7 +40,7 @@ services:
     apache:
         build: apache/
         ports:
-            - 8002:80
+            - 8080:80
         networks:
             - web
         environment:
@@ -35,8 +55,6 @@ services:
     # ---XWiki Nodes---
     node1:
         <<: *tomcat
-        ports:
-            - 8080:8080
         volumes:
             - node1:$TOMCAT_XWIKI_PATH
             - tomcat-attachments:/usr/local/tomcat/webapps/xwiki/data/store/file
@@ -44,8 +62,6 @@ services:
             NODE_NAME: "node1"
     node2:
         <<: *tomcat
-        ports:
-            - 8081:8080
         volumes:
             - node2:$TOMCAT_XWIKI_PATH
             - tomcat-attachments:/usr/local/tomcat/webapps/xwiki/data/store/file
@@ -98,21 +114,3 @@ services:
             - database
         profiles:
             - mysql
-
-volumes:
-    tomcat-attachments:
-    node1:
-    node2:
-    solr:
-    mariadb:
-    postgresql:
-    mysql:
-
-networks:
-    web:
-    cluster:
-        internal: true
-    database:
-        internal: true
-    solr:
-        internal: true

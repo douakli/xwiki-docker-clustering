@@ -19,7 +19,7 @@ or
 # docker-compose up
 ```
 
-XWiki can then be accessed from http://localhost:8002/
+XWiki can then be accessed from http://localhost:8080/
 
 By default, there is no administrator account set up in the instance.
 One can register and use a standard user account to edit pages, but will not have access to the administration page.
@@ -91,7 +91,6 @@ supports using HSQLDB, MariaDB, MySQL and PostgreSQL.
 XWiki embeds Solr 8. We provide a container for Solr 9.
 
 Using external Solr and Database is also necessary for clustering of XWiki.
-We however did not manage to get multiple instances of XWiki synchronized and clustered.
 
 ## Features
 The docker-compose file uses the "profiles" attribute makes a container start only if one of the listed profiles is active.
@@ -99,9 +98,9 @@ We use this mechanism to decide which database container to start.
 
 For a minimal configuration using only apache and tomcat: In the `.env` file, set `DB_TYPE=hsqldb` and `SOLR_TYPE=embedded`.
 
-On first startup, the different containers will populate the `data/` directory. Note that switching database **after** the `data/`
-directory is initialized is **not recommended**. No data will be transfered from the old database to the new one. If you need to change
-database, then reinitialize XWiki by removing the `data/` directory entirely.
+On first startup, the different containers will populate the volumes. Note that switching database **after** the volumes
+are initialized is **not recommended**. No data will be transfered from the old database to the new one. If you need to change
+database, then reinitialize XWiki by removing the volumes entirely.
 
 Finally, our tomcat Docker image handles environment variables and writes the content to the various configuration file using `sed` and marked locations.
 
@@ -112,8 +111,9 @@ the most important ones. We decided to use patches to edit the configuration fil
 We also use these patches to help us when we do have to use sed to insert configuration from environment variables.
 
 We implemented a custom entrypoint that takes care of initializing the data directory only if it has not been initialized before. It also handles editing configuration
-files in a non destructive way. The user still needs to be able to configure their XWiki installation, and they can do so through the `data/tomcat` directory.
-If they want to override a dynamically inserted configuration, one can simply remove the instertion markers.
+files in a non destructive way. The user still needs to be able to configure their XWiki installation, and they can do so through the volume, or by running an interactive
+session in the container with `docker compose exec -it node1 /bin/bash` for instance.
+If they want to override a dynamically inserted configuration, one can simply remove the insertion markers.
 
 To help us during the configuration, we followed XWiki's documentation: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Configuration
 and https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Installation/InstallationWAR/InstallationTomcat/
@@ -133,18 +133,111 @@ for a script (see http://www.faqs.org/faqs/unix-faq/faq/part4/section-7.html). F
 be applied to a binary. This is why we wrote a small C program that does the same thing.
 
 ### httpd (Apache)
-We technically did not need a reverse proxy at this point of the project, but it is required for the next step: enabling Clustering.
-We started setting up all the requirements for that goal, including a load balancing reverse proxy, here Apache httpd.
-
-To do so, we followed the following XWiki documentation: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Clustering/
+A reverse proxy is necessary to set up the load balancing of our cluster. The user accesses a single URL, but is redirected
+to a specific node.
+To set up the reverse proxy, we followed the following XWiki documentation: https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Clustering/
 and https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Clustering/DistributedEventClusterSetup/
 
-The process involves:
-* Making all the instances (in our case: tomcat containers) use the same database. (OK)
-* Making all the instances share their attachment store (data/tomcat/data/store/file) (OK)
-* Making each instance have their own private volume for permanent storage of everything else. (data/tomcat) (TODO)
-* Making all the instances share the events through remote observation \[We use a virtual network for all the instances, and they communicate through udp over multicast, which allow them to discover each other] (OK)
-* Making all the instances use the same Solr instance. \[Not mandatory, but makes more sense/ is more efficient] (OK)
-* Add a Load balancer to lead user to the different instances in the cluster (OKish, just need to add an entry for the extra instances hostnames)
+### Clustering
+The configurability of our tomcat image facilitates some of the steps involved in clustering XWiki.
+First of all, the database must be shared among the different members of the cluster.
+This means that clustering is not compatible with hsqldb. We simply configure all the tomcat containers with the same database connection.
+The Solr instance can be shared similarly.
 
-For our usage of httpd, we mainly want to edit `httpd.conf`.
+However, connecting the different nodes to the same database is not enough.
+XWiki has caches. This means that the different nodes must be able to communicate directly to each other to invalidate and update
+the different caches. This communication is already supported by XWiki, and uses JGroups. JGroups is a generic protocol that
+is usually transported over multicast UDP. However we can't use multicast in docker networks. The nodes can't discover each other.
+
+To allow the nodes to discover each other, we decided to use the TCPGOSSIP discovery protocol, which uses a (or multiple) central server
+(The gossip router) to gather the nodes.
+
+Finally, we need to share the attachments volume across the different nodes. In a distributed setup, a network filesystem would work.
+
+## Walkthrough
+Let's go through the setps to configure and use this dockerized version of XWiki.
+
+### Configuration
+The configuration is mainly done through the `.env` file.
+This file sets up environment variables prior to the interpretation of the `docker-compose.yml`.
+This allows for more control over the project.
+
+The first step is to uncomment the `XWIKI_SUPERADMIN_PASSWORD` line and to set a superadmin password.
+This password is temporary and will let us set up an actual Admin user later in the walkthrough.
+
+Then we can switch database if we wish to, we can use mysql or mariadb instead of postgresql.
+We can switch to hsqldb if we plan to use only one node in our cluster, which would just be a normal xwiki instance.
+
+Then we can decide if Solr should be embedded or remote. XWiki recommends to use a remote Solr when Clustering, so this
+is the default.
+In this example, we will stick to the defaults.
+
+Finally, we can decide on how many nodes we want in our cluster.
+This configuration is Unfortunately done through the `docker-compose.yml` because it involves
+creating an arbitrary amount of containers with custom parameters that can be configured.
+
+Find the `# ---XWiki Nodes---` in `docker-compose.yml`.
+If you wish to remove nodes, simply remove or comment the node\<N> container out.
+If you wish to add nodes, use the following template:
+
+```yaml
+    node999:
+        <<: *tomcat # Fragment syntax for common configuration.
+        volumes:
+            - node999:$TOMCAT_XWIKI_PATH
+            - tomcat-attachments:/usr/local/tomcat/webapps/xwiki/data/store/file # Shared volume
+        environment:
+            NODE_NAME: "node999"
+```
+
+Note: the `NODE_NAME` is what is reused in the apache(httpd) configuration and what is in the footer of wiki pages.
+
+Once we added the new container, we need to update related parts of the docker container:
+* In `# ---Load balancer---`, find the environment variable `NODES` and update the list according to your changes.
+* Find the global **volume** definitions `# ---Global definitions---` and update the volumes list.
+
+### Running XWiki
+We can start our XWiki cluster with `docker-compose up`.
+There are many container and they are very verbose, if we need to troubleshoot issues, it is better to look at
+container logs individually with `docker compose logs <container>`
+
+# TODO: Insert docker ps
+Once the containers started, we can access XWiki throught `http://localhost:8080`
+XWiki sets up some things and the initialization process might take some time.
+# TODO: Insert initialization
+
+Once the initialization is done, we land on a not found page, this is because the Home page got installed during the initialization phase,
+we just need to refresh.
+# TODO: Insert not found.
+# TODO: Insert Home.
+
+Notice how we can see on which node we have been sent to by the load balancer by reading the footer. Here, we are on node1.
+
+### Setting up an Admin account
+Let's login as `superadmin`, the user we created a password for in the configuration step.
+Click on the top right burger menu and click **Log-in**.
+
+The username is `superadmin` and the password is the one you set.
+
+Once logged-in, go back in the burger menu and click "Administer Wiki".
+
+From there, click "Users & Rights" then Users.
+
+Click "Create User"
+
+Fill in the form for your Admin user (not necessarily called admin) and click create.
+
+Then move to Groups, below Users.
+Find the `XWikiAdminGroup` and click "Edit".
+
+Select the Admin user you just created and click "Add". You can now close the form.
+
+We can now log-out from the superadmin user and stop XWiki by pressing CTRL+C in the terminal where we started it.
+
+Edit the `.env` file again, and comment the superadmin password line. We will use the admin account from now on for administrative tasks.
+
+Start XWiki again with `docker compose up`
+
+Now for the clustering, the user sessions are distributed. One can use a private window and see the difference in the footer.
+
+**Please see the screenshots in the `images` directory.
