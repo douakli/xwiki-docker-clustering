@@ -201,15 +201,11 @@ We can start our XWiki cluster with `docker-compose up`.
 There are many container and they are very verbose, if we need to troubleshoot issues, it is better to look at
 container logs individually with `docker compose logs <container>`
 
-# TODO: Insert docker ps
 Once the containers started, we can access XWiki throught `http://localhost:8080`
 XWiki sets up some things and the initialization process might take some time.
-# TODO: Insert initialization
 
 Once the initialization is done, we land on a not found page, this is because the Home page got installed during the initialization phase,
 we just need to refresh.
-# TODO: Insert not found.
-# TODO: Insert Home.
 
 Notice how we can see on which node we have been sent to by the load balancer by reading the footer. Here, we are on node1.
 
